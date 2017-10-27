@@ -20,8 +20,7 @@
         let progressBar = this.$refs.progressBar;
         let progress = (e.clientX - progressBar.getBoundingClientRect().left) / progressBar.clientWidth;
         this.$emit('progressChange',progress);
-        console.log(progress);
-        console.log(this.barColor);
+        // console.log(progress);
       }
     }
   }

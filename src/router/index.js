@@ -1,8 +1,8 @@
 import Vue from 'vue'
 import Router from 'vue-router'
 // import HelloWorld from '@/components/HelloWorld'
-import Player from '@/views/Player'
-// import MusicList from '@/views/MusicList'
+import Index from '@/views/Index'
+import List from '@/views/List'
 
 Vue.use(Router)
 
@@ -15,13 +15,13 @@ export default new Router({
     // }
     {
       path: '/',
-      name: 'Player',
-      component: Player
+      name: 'Index',
+      component: Index
+    },
+    {
+      path: '/list',
+      name: 'List',
+      component: List
     }
-    // {
-    //   path: '/list',
-    //   name: 'MusicList',
-    //   component: MusicList
-    // }
   ]
 })

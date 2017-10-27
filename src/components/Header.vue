@@ -8,6 +8,5 @@
 <script>
   import '@/assets/header.scss';
   export default {
-
   }
 </script>
