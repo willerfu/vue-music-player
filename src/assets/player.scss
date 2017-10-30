@@ -17,7 +17,24 @@
 			width: 180px;
 			height: 180px;
 			border-radius: 50%;
+			box-shadow: -1px -1px 13px #888;
 		}
+
+		.spin {
+			animation: myRotate 10s linear infinite;
+			//animation-play-state: paused; //paused|running;
+		}
+
+		@keyframes myRotate
+		{
+			from {
+				transform:rotate(0deg);
+			}
+			to {
+				transform:rotate(360deg);
+			}
+		}
+
 	}
 	.volume-container {
 		position: relative;

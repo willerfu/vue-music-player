@@ -1,15 +1,15 @@
 <template>
   <div class="container-player">
       <h1 class="caption">
-        <router-link v-bind:to="{path:'/list', query:{'musicItemId': musicItem.id}}">我的私人音乐坊 &gt;</router-link>
+        <router-link to="/list">我的私人音乐坊 &gt;</router-link>
       </h1>
       <div class="mt20 row">
         <div class="controll-wrapper">
           <h2 class="music-title">
-            {{musicItem.title}}
+            {{$store.state.currentMusicItem.title}}
           </h2>
           <h3 class="music-artist mt10">
-            {{musicItem.artist}}
+            {{$store.state.currentMusicItem.artist}}
           </h3>
           <div class="row mt20">
             <div class="left-time -col-auto">-{{leftTime}}</div>
@@ -36,18 +36,18 @@
           <div class="mt35 row">
             <div>
               <i @click="clickPrev" class="icon prev"></i>
-              <i class="icon ml20" @click="togglePlay" v-bind:class="isPlay ? 'pause' : 'play'"></i>
+              <i class="icon ml20" @click="togglePlay" v-bind:class="$store.state.isPlay ? 'pause' : 'play'"></i>
               <i @click="clickNext" class="icon next ml20"></i>
             </div>
             <div class="-col-auto">
-              <i class="icon repeat-cycle"></i>
+              <i class="icon" v-bind:class="`repeat-${model}`" @click="togglePlayModel"></i>
             </div>
           </div>
         </div>
         <div class="-col-auto cover">
-          <img
-            v-bind:src="musicItem.cover"
-            v-bind:alt="musicItem.title"
+          <img class="spin" v-bind:style="{animationPlayState: ($store.state.isPlay ? 'running':'paused')}"
+            v-bind:src="$store.state.currentMusicItem.cover"
+            v-bind:alt="$store.state.currentMusicItem.title"
           />
         </div>
       </div>
@@ -59,9 +59,7 @@
   import '@/assets/player.scss';
   // 相关组件 引入
   import ProgressBar from '@/components/Progress';
-
   export default {
-    props: ['musicList','musicItem'],
     data() {
       return {
         // 剩余时间
@@ -71,37 +69,51 @@
         // 音量
         volume: 0,
         // 播放状态
-        isPlay: false,
-        duration: ''
+        //isPlay: false,
+        duration: '',
+        // 播放模式 默认循环播放
+        model: 'cycle'
       }
     },
     components: {
       ProgressBar
     },
     mounted() {
-      // 初始化 jplayer
-      $('#player').jPlayer({
-        supplied: 'mp3',
-        wmode: 'window'
-      }).jPlayer('setMedia', {
-        mp3: this.musicItem.file
-      });
-
-      // 绑定jplayer事件
-      $('#player').bind($.jPlayer.event.timeupdate, (e) => {
-          this.duration = e.jPlayer.status.duration;
-          // 初始化 progress
-          this.progress = e.jPlayer.status.currentPercentAbsolute;
-          // 初始化 volume
-          this.volume= e.jPlayer.options.volume * 100;
-          //  初始化 leftTime
-          this.leftTime = this.formatTime(this.duration * (1 - e.jPlayer.status.currentPercentAbsolute / 100));
-      });
+      this.initPlayer();
+      this.endPlayer();
     },
     beforeDestory() {
       $('#player').unbind($.jPlayer.event.timeupdate);
+      $('#player').unbind($.jPlayer.event.ended);
     },
     methods: {
+      // 初始化 jplayer
+      initPlayer() {
+        $('#player').jPlayer({
+          supplied: 'mp3',
+          wmode: 'window'
+        }).jPlayer('setMedia', {
+          mp3: this.$store.state.currentMusicItem.file
+        });
+
+        // 绑定jplayer事件
+        $('#player').bind($.jPlayer.event.timeupdate, (e) => {
+            this.duration = e.jPlayer.status.duration;
+            // 初始化 progress
+            this.progress = e.jPlayer.status.currentPercentAbsolute;
+            // 初始化 volume
+            this.volume= e.jPlayer.options.volume * 100;
+            //  初始化 leftTime
+            this.leftTime = this.formatTime(this.duration * (1 - e.jPlayer.status.currentPercentAbsolute / 100));
+        });
+      },
+      // 结束事件
+      endPlayer() {
+        $('#player').bind($.jPlayer.event.ended, (e) => {
+          console.log(this.model);
+          this.playMusic(this.model);
+        });
+      },
       // 格式化时间
       formatTime(time) {
         time = Math.floor(time);
@@ -112,12 +124,9 @@
       },
       // 点击播放或暂停
       togglePlay() {
-        $('#player').jPlayer(this.isPlay ? 'pause' : 'play');
-        // 绑定jplayer事件
-        $('#player').bind($.jPlayer.event.timeupdate, (e) => {
-            console.log(e.jPlayer.options.volume);
-        });
-        this.isPlay = !this.isPlay;
+        $('#player').jPlayer(this.$store.state.isPlay? 'pause' : 'play');
+        // 触发修改 vuex中state
+        this.$store.commit('changeIsPlay');
       },
       // 更改音乐
       changeMusic(musicItem) {
@@ -125,35 +134,72 @@
           mp3: musicItem.file
         })
       },
-      // 获取音乐数组索引
-      findMusicIndex(musicItem){
-          return this.musicList.indexOf(musicItem);
-      },
       // 点击上一曲
       clickPrev() {
         // 获取当前播放项index
-        let index = this.findMusicIndex(this.musicItem);
-        let length = this.musicList.length;
-        let prevIndex = (index - 1 + length) % length;
-        // 更改音乐
-        this.changeMusic(this.musicList[prevIndex]);
-        this.$emit('changeCurrentItem', this.musicList[prevIndex])
-        // this.musicItem = this.musicList[prevIndex];
+        // let index = this.$store.getters.currentIndex;
+        // let length = this.$store.state.musicList.length;
+        // let prevIndex = (index - 1 + length) % length;
+        // // 更改音乐
+        // this.changeMusic(this.$store.state.musicList[prevIndex]);
+        // this.$emit('changeCurrentItem', this.$store.state.musicList[prevIndex])
+        this.playMusic('prev');
         // 判断isPlay 为true就直接播放
-        $('#player').jPlayer(this.isPlay ? 'play' : 'pause');
+        //  $('#player').jPlayer(this.$store.state.isPlay ? 'play' : 'pause');
+
       },
       // 点击下一曲
       clickNext() {
-        // 获取当前播放项index
-        let index = this.findMusicIndex(this.musicItem);
-        let length = this.musicList.length;
-        let nextIndex = (index + 1) % length;
-          // 更改音乐
-        this.changeMusic(this.musicList[nextIndex]);
-        this.$emit('changeCurrentItem', this.musicList[nextIndex])
-        // this.musicItem = this.musicList[nextIndex];
+        // // 获取当前播放项index
+        // let index = this.$store.getters.currentIndex;
+        // let length = this.$store.state.musicList.length;
+        // let nextIndex = (index + 1) % length;
+        //   // 更改音乐
+        // this.changeMusic(this.$store.state.musicList[nextIndex]);
+        // this.$emit('changeCurrentItem', this.$store.state.musicList[nextIndex])
+          this.playMusic('next');
         // 判断isPlay 为true就直接播放
-        $('#player').jPlayer(this.isPlay ? 'play' : 'pause');
+        //$('#player').jPlayer(this.$store.state.isPlay ? 'play' : 'pause');
+      },
+      // 切换模式
+      togglePlayModel() {
+        const MODEL = ['cycle', 'once', 'random'];
+        let currentModelIndex = MODEL.indexOf(this.model);
+        let nextModel = (currentModelIndex + 1) % MODEL.length;
+        this.model = MODEL[nextModel];
+      },
+      /**
+       * 整合 上一曲/下一曲/切换播放模式三个功能
+       */
+      playMusic(type) {
+        // 获取当前播放项index
+        let index = this.$store.getters.currentIndex;
+        let length = this.$store.state.musicList.length;
+        let nextIndex;
+        switch (type) {
+          case 'next':
+            nextIndex = (index + 1) % length;
+            break;
+          case 'prev':
+            nextIndex = (index - 1 + length) % length;
+            break;
+          case 'cycle':
+            nextIndex = (index + 1) % length;
+            break;
+          case 'once':
+            nextIndex = index;
+            break;
+          case 'random':
+            nextIndex = Math.round(Math.random() * length);
+            break;
+          default:
+        }
+        // 更改音乐
+        console.log(nextIndex);
+        this.changeMusic(this.$store.state.musicList[nextIndex]);
+        this.$emit('changeCurrentItem', this.$store.state.musicList[nextIndex]);
+        // 判断isPlay 为true就直接播放
+        $('#player').jPlayer(this.$store.state.isPlay ? 'play' : 'pause');
       },
       // 调节改变音量
       volumeChangeHandler(progress) {
@@ -164,7 +210,7 @@
       // 调节改变播放进度
       progressChangeHandler(progress) {
         this.progress = progress;
-        $('#player').jPlayer(this.isPlay ? 'play' : 'pause', this.duration * this.progress);
+        $('#player').jPlayer(this.$store.state.isPlay ? 'play' : 'pause', this.duration * this.progress);
       }
     }
   }
