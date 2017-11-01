@@ -12,14 +12,15 @@
             {{$store.state.currentMusicItem.artist}}
           </h3>
           <div class="row mt20">
-            <div class="left-time -col-auto">-{{leftTime}}</div>
+            <div class="left-time -col-auto">{{playTime}}</div>
             <div class="volume-container">
               <i class="icon-volume rt" v-bind:style="{
                 top: '5px',
                 left: '-5px'
               }"></i>
               <div class="volume-wrapper">
-                <progress-bar v-bind:progress="volume" v-bind:barColor="'#ff0000'"
+                <!-- v-bind:barColor="'#ff0000'" -->
+                <progress-bar v-bind:progress="volume"
                   v-on:progressChange="volumeChangeHandler"
                 ></progress-bar>
               </div>
@@ -30,7 +31,8 @@
             lineHeight: '10px',
             marginTop: '20px'
           }">
-            <progress-bar v-bind:progress="progress" v-bind:barColor="'#ff0000'"
+          <!-- v-bind:barColor="'#ff0000'" -->
+            <progress-bar v-bind:progress="progress"
               v-on:progressChange="progressChangeHandler"></progress-bar>
           </div>
           <div class="mt35 row">
@@ -63,7 +65,8 @@
     data() {
       return {
         // 剩余时间
-        leftTime: '00',
+        leftTime: '00:00',
+        playTime: '00:00',
         // 播放进度
         progress: '',
         // 音量
@@ -89,13 +92,6 @@
     methods: {
       // 初始化 jplayer
       initPlayer() {
-        $('#player').jPlayer({
-          supplied: 'mp3',
-          wmode: 'window'
-        }).jPlayer('setMedia', {
-          mp3: this.$store.state.currentMusicItem.file
-        });
-
         // 绑定jplayer事件
         $('#player').bind($.jPlayer.event.timeupdate, (e) => {
             this.duration = e.jPlayer.status.duration;
@@ -104,13 +100,14 @@
             // 初始化 volume
             this.volume= e.jPlayer.options.volume * 100;
             //  初始化 leftTime
-            this.leftTime = this.formatTime(this.duration * (1 - e.jPlayer.status.currentPercentAbsolute / 100));
-        });
+            //this.leftTime = this.formatTime(this.duration * (1 - e.jPlayer.status.currentPercentAbsolute / 100));
+            this.playTime = this.formatTime(this.duration * (e.jPlayer.status.currentPercentAbsolute / 100));
+          });
       },
       // 结束事件
       endPlayer() {
         $('#player').bind($.jPlayer.event.ended, (e) => {
-          console.log(this.model);
+          // console.log(this.model);
           this.playMusic(this.model);
         });
       },
@@ -195,7 +192,6 @@
           default:
         }
         // 更改音乐
-        console.log(nextIndex);
         this.changeMusic(this.$store.state.musicList[nextIndex]);
         this.$emit('changeCurrentItem', this.$store.state.musicList[nextIndex]);
         // 判断isPlay 为true就直接播放

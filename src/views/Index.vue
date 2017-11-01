@@ -1,6 +1,7 @@
 <template>
   <div>
     <nav-header></nav-header>
+    <div class="bg-blur" v-bind:style="{backgroundImage: `url(${$store.state.currentMusicItem.cover})`}"></div>
     <player v-on:changeCurrentItem="changeCurrentItem"></player>
   </div>
 </template>

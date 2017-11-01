@@ -5,7 +5,7 @@
       v-bind:class="{focus:$store.getters.currentIndex == index}"
       @click="play(item)">
       <p><strong>{{item.title}}</strong> - {{item.artist}}</p>
-      <p class="-col-auto delete" @click="deleteMusic(index)"></p>
+      <p class="-col-auto delete" @click.stop="deleteMusic(index)"></p>
     </li>
   </ul>
 </template>
@@ -20,13 +20,16 @@
     },
     methods: {
       deleteMusic(index) {
+
         this.$emit('delMusic', index);
       },
       // 点击列表选项后 播放
       play(item) {
         this.$store.commit('changeCurrentItem', item);
-        this.$store.commit('changeIsPlay');
-        $('#player').jPlayer(this.isPlay ? 'pause' : 'play');
+        this.$store.commit('changeIsPlay', true);
+        $('#player').jPlayer('setMedia', {
+          mp3: item.file
+        }).jPlayer('play');
       }
     }
   }

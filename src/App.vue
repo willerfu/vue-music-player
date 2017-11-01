@@ -8,6 +8,14 @@
 <script>
   // import { MUSIC_LIST } from '../mock/musiclist';
   export default {
-    name: 'app'
+    name: 'app',
+    mounted() {
+      $('#player').jPlayer({
+        supplied: 'mp3',
+        wmode: 'window',
+      }).jPlayer('setMedia', {
+        mp3: this.$store.state.currentMusicItem.file
+      });
+    }
   }
 </script>

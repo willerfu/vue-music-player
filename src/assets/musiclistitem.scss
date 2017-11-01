@@ -1,7 +1,7 @@
 .components-musiclistitem {
 	height: 36px;
 	line-height: 36px;
-	border-bottom: 1px solid #ddd;
+	border-bottom: 1px solid rgba(77,77,77,.5);
 	text-indent: 10px;
   transition: all .1s;
   user-select: none;
@@ -17,7 +17,7 @@
 		&::before, &::after{
 			content: '';
 			display: block;
-			background: #666;
+			background: rgba(77,77,77,.5);
 			position: absolute;
 		}
 		&::before {
@@ -36,12 +36,12 @@
 
 	&.focus {
 		color: #2f9842;
-    background: #ddd;
+    background: rgba(215,215,215,.5);
 	}
 }
 .components-musiclistitem:hover {
-	background: #eee;
+	background: rgba(77,77,77,.25);
 }
 .components-musiclistitem:active {
-	background: #ddd;
+	background: rgba(215,215,215,.5);
 }

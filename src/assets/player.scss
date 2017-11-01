@@ -5,13 +5,15 @@
 
 	.caption {
 		font-size: 16px;
-		color: rgb(47, 152, 66);
+		color: rgba(77, 77, 77,.5);
 	}
 
 	.cover {
 		width: 180px;
 		height: 180px;
 		margin-left: 20px;
+		border-radius: 50%;
+		border: 5px solid rgba(200,200,200,.4);
 
 		img {
 			width: 180px;
@@ -21,7 +23,7 @@
 		}
 
 		.spin {
-			animation: myRotate 10s linear infinite;
+			animation: myRotate 20s linear infinite;
 			//animation-play-state: paused; //paused|running;
 		}
 
@@ -51,7 +53,7 @@
 	.music-title {
 	    font-size: 25px;
 	    font-weight: 400;
-	    color: rgb(3, 3, 3);
+	    color: #464545;
 	    height: 36px;
 	    line-height: 36px;
 	}
@@ -62,7 +64,7 @@
     }
     .left-time {
     	font-size: 14px;
-    	color: #999;
+    	color: #4d4d4d;
     	font-weight: 400;
     	width: 40px;
     }

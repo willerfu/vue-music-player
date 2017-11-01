@@ -32,8 +32,8 @@ const store = new Vuex.Store({
       state.currentMusicItem = item
     },
     // 更改播放状态
-    changeIsPlay(state) {
-      state.isPlay = !state.isPlay
+    changeIsPlay(state, status) {
+      state.isPlay = status ? status : !state.isPlay
     },
     deleteMusicItem(state, index) {
       state.musicList.splice(index, 1);
